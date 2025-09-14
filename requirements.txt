@@ -1,4 +1,4 @@
 requests
 openai
-dotenv
+python-dotenv
 csv
