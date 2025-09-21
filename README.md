@@ -4,12 +4,21 @@ A Python application that fetches stock ticker data from the Polygon.io API and 
 
 ## Project Structure
 
-- `script.py` - Main ticker fetching script (can be run standalone or imported)
-- `schedule_ticker_script.py` - Automated scheduler that runs the ticker fetcher every minute
-- `requirements.txt` - Python dependencies
-- `.env` - Environment variables (API keys) - **not tracked in git**
-- `tickers.csv` - Output file containing fetched ticker data
-- `README.md` - This documentation file
+```
+├── src/
+│   ├── __init__.py                   # Python package marker
+│   ├── script.py                     # Main ticker fetching script
+│   └── schedule_ticker_script.py     # Automated scheduler (runs daily at 9 PM IST)
+├── build/
+│   └── docker/                       # Docker configuration files
+├── requirements.txt                  # Python dependencies
+├── .env.example                      # Environment variables template
+├── .env                              # Environment variables (API keys) - **not tracked in git**
+├── output/                           # Directory for CSV output files
+├── logs/                             # Directory for log files
+├── docker.sh                         # Convenience script for Docker commands
+└── README.md                         # This documentation file
+```
 
 ## Setup Instructions
 
@@ -79,7 +88,7 @@ The application provides two modes of operation:
 
 2. **Run the script once**:
    ```bash
-   python script.py
+   python src/script.py
    ```
 
 ### Option 2: Automated Scheduled Updates
@@ -91,28 +100,60 @@ The application provides two modes of operation:
 
 2. **Run the scheduled script**:
    ```bash
-   python schedule_ticker_script.py
+   python src/schedule_ticker_script.py
    ```
 
 ### What the Application Does
 
-- **One-time mode** (`script.py`): Fetches stock ticker data once and exits
-- **Scheduled mode** (`schedule_ticker_script.py`): Continuously fetches ticker data every minute
-- Fetches stock ticker data from Polygon.io API
-- Displays progress information in the console
-- Saves all ticker data to `tickers.csv` in the project root
+- **One-time mode** (`src/script.py`): Fetches stock ticker data once and exits
+- **Scheduled mode** (`src/schedule_ticker_script.py`): Continuously fetches ticker data daily at 9 PM IST
+- Fetches stock ticker data from Polygon.io API with comprehensive error handling
+- Provides detailed logging to both console and log files (`logs/ticker_fetch.log`)
+- Displays progress information and tracks page-by-page data collection
+- Saves all ticker data to `output/tickers.csv`
 - Includes a 20-second delay between API calls to respect rate limits
+- Validates API responses and handles network errors gracefully
 
 ### Output
 
-The script generates a CSV file (`tickers.csv`) containing:
-- Ticker symbol
-- Company name
-- Market information
-- Exchange details
-- Financial identifiers (CIK, FIGI codes)
-- Currency and locale information
-- Last updated timestamp
+The script generates:
+- **CSV file** (`output/tickers.csv`) containing:
+  - Ticker symbol
+  - Company name
+  - Market information
+  - Exchange details
+  - Financial identifiers (CIK, FIGI codes)
+  - Currency and locale information
+  - Last updated timestamp
+- **Log files** (`logs/ticker_fetch.log`) containing:
+  - Detailed execution logs with timestamps
+  - Progress tracking (page count, total tickers)
+  - Error messages and debugging information
+  - File size and completion statistics
+
+### Monitoring and Logs
+
+The application provides comprehensive logging for monitoring and debugging:
+
+```bash
+# View real-time logs during execution
+tail -f logs/ticker_fetch.log
+
+# View recent log entries
+tail -n 50 logs/ticker_fetch.log
+
+# Search for errors in logs
+grep -i error logs/ticker_fetch.log
+
+# Monitor file sizes
+ls -lh output/tickers.csv logs/ticker_fetch.log
+```
+
+**Log Levels**:
+- **INFO**: General process flow, progress updates
+- **ERROR**: Critical failures, API errors
+- **WARNING**: Potential issues, missing data
+- **DEBUG**: Detailed debugging information
 
 ### Deactivating the Virtual Environment
 

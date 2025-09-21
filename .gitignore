@@ -1,3 +1,5 @@
 .env
 pythonenv
 __pycache__
+output/
+logs/
