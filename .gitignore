@@ -1,3 +1,8 @@
 .env
 pythonenv
 __pycache__
+logs/
+*.log
+*.csv
+output/
+test*

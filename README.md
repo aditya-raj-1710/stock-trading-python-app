@@ -51,16 +51,37 @@ pythonenv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
-#### 4. Configure API Key
+#### 4. Configure Environment Variables
 ```bash
-# Create a .env file in the project root
-touch .env
+# Copy the example environment file
+cp .env.example .env
 
-# Add your Polygon.io API key to the .env file
-echo "POLYGON_API_KEY=your_api_key_here" >> .env
+# Edit the .env file and add your API keys
+nano .env
 ```
 
-#### 5. Verify Installation
+Required environment variables:
+```bash
+# Polygon.io API Configuration
+POLYGON_API_KEY=your_polygon_api_key_here
+
+# Snowflake Configuration
+SNOWFLAKE_ACCOUNT=ny85162
+SNOWFLAKE_USER=your_snowflake_username
+SNOWFLAKE_PASSWORD=your_snowflake_password
+SNOWFLAKE_WAREHOUSE=COMPUTE_WH
+SNOWFLAKE_DATABASE=STOCK_DATA
+SNOWFLAKE_SCHEMA=PUBLIC
+SNOWFLAKE_TABLE=TICKERS
+```
+
+#### 5. Test Snowflake Connection
+```bash
+# Test your Snowflake setup before running the main script
+python test_snowflake_connection.py
+```
+
+#### 6. Verify Installation
 ```bash
 # Check if packages are installed correctly
 pip list
@@ -97,22 +118,58 @@ The application provides two modes of operation:
 ### What the Application Does
 
 - **One-time mode** (`script.py`): Fetches stock ticker data once and exits
-- **Scheduled mode** (`schedule_ticker_script.py`): Continuously fetches ticker data every minute
-- Fetches stock ticker data from Polygon.io API
-- Displays progress information in the console
-- Saves all ticker data to `tickers.csv` in the project root
+- **Scheduled mode** (`schedule_ticker_script.py`): Continuously fetches ticker data daily at 9 PM IST
+- Fetches stock ticker data from Polygon.io API with comprehensive error handling
+- Provides detailed logging to both console and log files (`logs/ticker_fetch.log`)
+- Displays progress information and tracks page-by-page data collection
+- Saves all ticker data to `output/tickers.csv`
+- **NEW**: Automatically pushes data to Snowflake database for analytics
 - Includes a 20-second delay between API calls to respect rate limits
+- Validates API responses and handles network errors gracefully
 
 ### Output
 
-The script generates a CSV file (`tickers.csv`) containing:
-- Ticker symbol
-- Company name
-- Market information
-- Exchange details
-- Financial identifiers (CIK, FIGI codes)
-- Currency and locale information
-- Last updated timestamp
+The script generates:
+- **CSV file** (`output/tickers.csv`) containing:
+  - Ticker symbol
+  - Company name
+  - Market information
+  - Exchange details
+  - Financial identifiers (CIK, FIGI codes)
+  - Currency and locale information
+  - Last updated timestamp
+- **Snowflake database** with the same data plus:
+  - Data loaded timestamp
+  - Batch ID for tracking data loads
+- **Log files** (`logs/ticker_fetch.log`) containing:
+  - Detailed execution logs with timestamps
+  - Progress tracking (page count, total tickers)
+  - Error messages and debugging information
+  - File size and completion statistics
+
+### Monitoring and Logs
+
+The application provides comprehensive logging for monitoring and debugging:
+
+```bash
+# View real-time logs during execution
+tail -f logs/ticker_fetch.log
+
+# View recent log entries
+tail -n 50 logs/ticker_fetch.log
+
+# Search for errors in logs
+grep -i error logs/ticker_fetch.log
+
+# Monitor file sizes
+ls -lh output/tickers.csv logs/ticker_fetch.log
+```
+
+**Log Levels**:
+- **INFO**: General process flow, progress updates
+- **ERROR**: Critical failures, API errors
+- **WARNING**: Potential issues, missing data
+- **DEBUG**: Detailed debugging information
 
 ### Deactivating the Virtual Environment
 
